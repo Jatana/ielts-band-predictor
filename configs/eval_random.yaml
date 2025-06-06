@@ -1,5 +1,4 @@
-# Default values; override via CLI if needed
-ckpt: artifacts/checkpoints/best-step=3095-val_mae=1.085.ckpt
+ckpt: artifacts/checkpoints/best.ckpt
 data: data/raw/essays.jsonl
 k: 20 # how many essays to sample
 max_len: 512 # tokenizer max_length

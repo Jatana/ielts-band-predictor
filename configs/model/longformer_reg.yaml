@@ -1,5 +1,0 @@
-_target_: ielts_band_predictor.models.LongformerBandRegressor
-pretrained_name: allenai/longformer-base-4096
-lr: 1e-5
-weight_decay: 1e-2
-freeze_n_layers: 13

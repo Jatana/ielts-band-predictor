@@ -1,6 +1,0 @@
-# configs/model/deberta_reg.yaml
-_target_: ielts_band_predictor.models.DebertaBandRegressor
-pretrained_name: microsoft/deberta-v3-base
-lr: 1.5e-5 # DeBERTa often prefers a touch lower LR
-weight_decay: 1e-2
-freeze_n_layers: 4
