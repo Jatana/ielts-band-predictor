@@ -108,6 +108,8 @@ docker compose up --build -d
 
 ## 6 · Score an essay via REST
 
+Do not forget to get back to the root directory while running the next command!
+
 ```bash
 poetry run python -m ielts_band_predictor.scripts.client_test
 ```
