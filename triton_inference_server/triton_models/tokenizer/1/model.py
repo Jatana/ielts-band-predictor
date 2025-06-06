@@ -27,8 +27,8 @@ class TritonPythonModel:
                 max_length=MAX_LEN,
                 return_tensors="np",
             )
-            ids = enc["input_ids"].astype(np.int64)
-            mask = enc["attention_mask"].astype(np.int64)
+            ids = enc["input_ids"].astype(np.int32)
+            mask = enc["attention_mask"].astype(np.int32)
 
             tens_ids = pb_utils.Tensor("input_ids", ids)
             tens_mask = pb_utils.Tensor("attention_mask", mask)

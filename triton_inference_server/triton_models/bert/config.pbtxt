@@ -1,10 +1,10 @@
 name: "bert"
-platform: "onnxruntime_onnx"
+platform: "tensorrt_plan"
 max_batch_size:  8
 
 input [
-  { name: "input_ids"      data_type: TYPE_INT64 dims: [ 512 ] },
-  { name: "attention_mask" data_type: TYPE_INT64 dims: [ 512 ] }
+  { name: "input_ids"      data_type: TYPE_INT32 dims: [ 512 ] },
+  { name: "attention_mask" data_type: TYPE_INT32 dims: [ 512 ] }
 ]
 
 output [
