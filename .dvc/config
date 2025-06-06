@@ -1,0 +1,7 @@
+[core]
+    remote = r2remote
+['remote "r2remote"']
+    url = s3://mlops-ielts-dataset
+    endpointurl = https://298bd67fcbb37695a74ad2402f1ca3f6.r2.cloudflarestorage.com
+    access_key_id = f4b34498230a2171a59ba14cdad944a5
+    secret_access_key = 1920ff423da6de661a957c047de8e11b7bc160ae21ddad970892bedfe172d9c5
