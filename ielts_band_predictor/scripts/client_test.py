@@ -9,7 +9,8 @@ from typing import List
 import hydra
 import requests
 from omegaconf import DictConfig, OmegaConf
-from remove_nonascii import strip_non_ascii
+
+from ielts_band_predictor.scripts.remove_nonascii import strip_non_ascii
 
 
 def _payload(essays: List[str]) -> bytes:

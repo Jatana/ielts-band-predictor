@@ -11,10 +11,10 @@ from typing import List
 import hydra
 import torch
 from omegaconf import DictConfig, OmegaConf
-from remove_nonascii import strip_non_ascii
 from transformers import AutoTokenizer
 
 from ielts_band_predictor.models import BertBandRegressor
+from ielts_band_predictor.scripts.remove_nonascii import strip_non_ascii
 
 
 def _load_jsonl(path: str | Path):
