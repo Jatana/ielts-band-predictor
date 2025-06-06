@@ -1,0 +1,4 @@
+triton_inference_server/triton_models/bert/1/*
+artifacts/checkpoints/*
+artifacts/model.onnx
+artifacts/model.plan
