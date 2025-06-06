@@ -29,9 +29,9 @@ poetry run pre-commit install
 poetry run python -m ielts_band_predictor.scripts.train
 ```
 
-- Hyper-parameters are managed by **Hydra**. Training parameters are located configs/train.yaml.
+- Hyper-parameters are managed by **Hydra**. Training parameters are located `configs/train.yaml`.
 
-- Displays graphs at MLFlow. Expects that the MLFlow server is already up. The address can be configured in configs/logger/mlflow.yaml (by default 127.0.0.1:8080).
+- Displays graphs at MLFlow. Expects that the MLFlow server is already up. The address can be configured in `configs/logger/mlflow.yaml` (by default 127.0.0.1:8080).
 
 - The best checkpoint is saved to `artifacts/checkpoints/best.ckpt`. All checkpoints can be found in `artifacts/checkpoints/`.
 
@@ -49,7 +49,7 @@ poetry run mlflow server --host 127.0.0.1 --port 8080 --backend-store-uri sqlite
 poetry run python -m ielts_band_predictor.scripts.eval_random
 ```
 
-Check trained model on random essays. Hyperparameters can be configured in configs/eval_random.yaml. Outputs band, prediction, absolute error and reports MAE / RMSE.
+Check trained model on random essays. Hyperparameters can be configured in `configs/eval_random.yaml`. Outputs band, prediction, absolute error and reports MAE / RMSE.
 
 ---
 
@@ -68,7 +68,7 @@ docker run --gpus all --rm -it -v $(pwd):/workspace \
 bash ielts_band_predictor/scripts/export_trt.sh
 ```
 
-Hyperparameters of exporting to ONNX can be configured in configs/export_onnx.yaml. Hyperparameters of exporting to TensorRT can be configured in the bash file.
+Hyperparameters of exporting to ONNX can be configured in `configs/export_onnx.yaml`. Hyperparameters of exporting to TensorRT can be configured in the bash file.
 
 ---
 
@@ -108,26 +108,6 @@ The script
 3. sends them to Triton (`ielts_pipeline` ensemble),
 4. prints predicted bands.
 
-Hyperparameters can be configured in configs/infer.yaml.
-
----
-
-### Directory structure (abridged)
-
-```
-├─ ielts_band_predictor/
-│  ├─ scripts/
-│  │   ├─ train.py            # Hydra + Lightning
-│  │   ├─ export_onnx.py
-│  │   ├─ export_trt.sh
-│  │   ├─ client_test.py      # REST → Triton
-│  │   └─ eval_random.py
-│  ├─ data.py                 # DataModule
-│  └─ models.py               # Bert/Longformer regressors
-├─ scripts/                   # helper notebooks, etc.
-├─ configs/                   # Hydra YAMLs
-├─ triton_models/             # tokenizer, engine, ensemble
-└─ artifacts/                 # checkpoints, .onnx, .plan
-```
+Hyperparameters can be configured in `configs/infer.yaml`.
 
 ---
