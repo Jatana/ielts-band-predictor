@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  triton:
+    image: ielts-triton:1.0
+    build: .
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "8010:8000"
+      - "8011:8001"
+      - "8012:8002"
+    restart: unless-stopped

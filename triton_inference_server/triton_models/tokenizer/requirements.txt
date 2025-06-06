@@ -1,0 +1,4 @@
+# === minimal set for Hugging Face tokenizer ===
+transformers==4.40.2      # версия ≥ той, что вы использовали локально
+tokenizers>=0.15.0        # устанавливается автоматически, но укажем явно
+sentencepiece>=0.1.99     # нужен для T5/DeBERTa, не нужен для BERT

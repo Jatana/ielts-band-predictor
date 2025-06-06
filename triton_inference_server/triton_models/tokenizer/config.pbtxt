@@ -1,0 +1,12 @@
+name: "tokenizer"
+backend: "python"
+max_batch_size: 8
+
+input [
+  { name: "TEXT" data_type: TYPE_STRING dims: [ -1 ] }  # variable-length strings
+]
+
+output [
+  { name: "input_ids"      data_type: TYPE_INT64 dims: [ -1 ] },
+  { name: "attention_mask" data_type: TYPE_INT64 dims: [ -1 ] }
+]
