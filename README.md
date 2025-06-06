@@ -55,20 +55,22 @@ Check trained model on random essays. Hyperparameters can be configured in `conf
 
 ## 4 · Model export
 
-| Step         | Command                                                                          | Result                 |
-| ------------ | -------------------------------------------------------------------------------- | ---------------------- |
-| **ONNX**     | `poetry run python -m ielts_band_predictor.scripts.export_onnx`                  | `artifacts/model.onnx` |
-| **TensorRT** | _(inside NVIDIA container)_<br>`bash ielts_band_predictor/scripts/export_trt.sh` | `artifacts/model.plan` |
+To export .ckpt model to ONNX format run
+
+```bash
+poetry run python -m ielts_band_predictor.scripts.export_onnx
+```
+
+By default it will convert `artifacts/checkpoints/best.ckpt` to `artifacts/model.onnx`. To specify custom files modify `configs/export_onnx.yaml`.
 
 ```bash
 # fire up the TensorRT image
-docker run --gpus all --rm -it -v $(pwd):/workspace \
-  nvcr.io/nvidia/tensorrt:24.04-py3
-# inside the shell:
-bash ielts_band_predictor/scripts/export_trt.sh
+docker run --gpus all --rm -v "$(pwd)":/workspace \
+  nvcr.io/nvidia/tensorrt:24.04-py3 \
+  bash -c "cd /workspace && bash ielts_band_predictor/scripts/export_trt.sh"
 ```
 
-Hyperparameters of exporting to ONNX can be configured in `configs/export_onnx.yaml`. Hyperparameters of exporting to TensorRT can be configured in the bash file.
+Hyperparameters of exporting to TensorRT can be configured in the bash file.
 
 ---
 
