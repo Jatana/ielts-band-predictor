@@ -1,0 +1,2 @@
+max_non_ascii_ratio: 0.05 # at most 5% of chars can be stripped
+max_non_ascii_abs: 50 # or 50 chars absolute cap

@@ -1,0 +1,9 @@
+defaults:
+  - cleaning: default
+
+server:
+  url: http://localhost:8010
+  model: ielts_pipeline # Triton ensemble name
+
+data_path: data/raw/essays.jsonl
+k: 3 # how many random essays to sample

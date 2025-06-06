@@ -4,3 +4,5 @@ pretrained_name: bert-base-uncased # 'bert-large-cased'
 lr: 2e-5
 weight_decay: 1e-2
 freeze_n_layers: 10 # freeze bottom N encoder layers
+warmup_steps: null
+total_steps: null

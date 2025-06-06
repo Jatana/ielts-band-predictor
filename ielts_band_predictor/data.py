@@ -16,15 +16,15 @@ from ielts_band_predictor.scripts.remove_nonascii import strip_non_ascii
 class IELTSDataModule(LightningDataModule):
     def __init__(
         self,
-        raw_path: str,
-        batch_size: int = 16,
-        max_length: int = 512,
-        val_size: float = 0.1,
-        num_workers: int = 4,
-        seed: int = 42,
-        max_non_ascii_ratio: float = 0.05,
-        max_non_ascii_abs: int = 50,
-        tokenizer_name: str = "bert-base-uncased",
+        raw_path=None,
+        batch_size=None,
+        max_length=None,
+        val_size=None,
+        num_workers=None,
+        seed=None,
+        max_non_ascii_ratio=None,
+        max_non_ascii_abs=None,
+        tokenizer_name=None,
     ):
         super().__init__()
         self.raw_path = raw_path
@@ -33,8 +33,8 @@ class IELTSDataModule(LightningDataModule):
         self.val_size = val_size
         self.num_workers = num_workers
         self.seed = seed
-        self.max_non_ascii_ratio = 0.05
-        self.max_non_ascii_abs = 50
+        self.max_non_ascii_ratio = max_non_ascii_ratio
+        self.max_non_ascii_abs = max_non_ascii_abs
         self.tokenizer_name = tokenizer_name
 
         self.tokenizer: AutoTokenizer | None = None

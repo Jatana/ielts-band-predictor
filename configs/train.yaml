@@ -1,4 +1,5 @@
 defaults:
+  - cleaning: default # configs/cleaning/default.yaml
   - datamodule: default # configs/datamodule/default.yaml
   - model: bert_reg # configs/model/bert_reg.yaml
   - optimizer: adamw # -configs/optimizer/adamw.yaml

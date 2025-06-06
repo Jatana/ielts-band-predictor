@@ -14,12 +14,12 @@ from transformers import (
 class BertBandRegressor(pl.LightningModule):
     def __init__(
         self,
-        pretrained_name: str = "bert-base-uncased",
-        lr: float = 2e-5,
-        weight_decay: float = 1e-2,
-        freeze_n_layers: int = 8,
-        warmup_steps: int | None = None,
-        total_steps: int | None = None,
+        pretrained_name=None,
+        lr=None,
+        weight_decay=None,
+        freeze_n_layers=None,
+        warmup_steps=None,
+        total_steps=None,
     ):
         super().__init__()
         self.save_hyperparameters()

@@ -1,3 +1,6 @@
+defaults:
+  - cleaning: default
+
 ckpt: artifacts/checkpoints/best.ckpt
 data: data/raw/essays.jsonl
 k: 20 # how many essays to sample

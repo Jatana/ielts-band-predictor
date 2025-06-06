@@ -8,3 +8,5 @@ num_workers: 4
 seed: ${seed}
 
 tokenizer_name: ${model.pretrained_name}
+max_non_ascii_ratio: ${cleaning.max_non_ascii_ratio}
+max_non_ascii_abs: ${cleaning.max_non_ascii_abs}

@@ -1,19 +1,19 @@
+from __future__ import annotations
+
 import json
-import pathlib
 import random
 import textwrap
+from pathlib import Path
 from typing import List
 
+import hydra
 import requests
-
-from ielts_band_predictor.scripts.remove_nonascii import strip_non_ascii
-
-SERVER_URL = "http://localhost:8010"
-MODEL_NAME = "ielts_pipeline"
-INFER_URL = f"{SERVER_URL}/v2/models/{MODEL_NAME}/infer"
+from omegaconf import DictConfig, OmegaConf
+from remove_nonascii import strip_non_ascii
 
 
 def _payload(essays: List[str]) -> bytes:
+    """Build Triton-v2 REST JSON body (string tensor, shape [batch,1])."""
     return json.dumps(
         {
             "inputs": [
@@ -30,50 +30,54 @@ def _payload(essays: List[str]) -> bytes:
     ).encode("utf-8")
 
 
-def query_triton(essays: List[str]) -> List[float]:
+def query_triton(url: str, essays: List[str]) -> List[float]:
+    resp = requests.post(url, data=_payload(essays), headers={"Content-Type": "application/json"})
     try:
-        resp = requests.post(
-            INFER_URL, data=_payload(essays), headers={"Content-Type": "application/json"}
-        )
         resp.raise_for_status()
     except requests.HTTPError as e:
         raise RuntimeError("Triton request failed:\n" + resp.text) from e
-
-    obj = resp.json()
-    scores = obj["outputs"][0]["data"]
-    return scores
+    return resp.json()["outputs"][0]["data"]
 
 
-DATA_PATH = pathlib.Path("data/raw/essays.jsonl")
+def load_dataset(path: Path) -> List[dict]:
+    return [json.loads(line) for line in path.open()]
 
 
-def load_dataset(path: pathlib.Path):
-    with path.open() as f:
-        return [json.loads(line) for line in f]
-
-
-def sample_essays(dataset, k=1):
-    """Return k random records (list of dicts)."""
-    return random.sample(dataset, k)
-
-
-def pretty_print(record, pred):
+def pretty_print(rec: dict, pred: float) -> None:
     print("=" * 80)
-    print(f"BAND  : {record['band']} PREDICTED : {pred:.2f}")
-    print(f"PROMPT: {record['prompt']}")
+    print(f"BAND  : {rec['band']}   PREDICTED : {pred:.2f}")
+    print(f"PROMPT: {rec['prompt']}")
     print("\nESSAY :\n")
-    print(textwrap.fill(record["essay"], width=80, replace_whitespace=False))
-    print()
+    print(textwrap.fill(rec["essay"], width=80, replace_whitespace=False), "\n")
+
+
+@hydra.main(config_path="../../configs", config_name="infer", version_base="1.3")
+def main(cfg: DictConfig) -> None:
+    print(OmegaConf.to_yaml(cfg, resolve=True))
+
+    infer_url = f"{cfg.server.url}/v2/models/{cfg.server.model}/infer"
+
+    dataset = load_dataset(Path(cfg.data_path))
+    for rec in random.sample(dataset, cfg.k):
+        # ASCII cleaning
+        rec["prompt"] = strip_non_ascii(
+            rec["prompt"],
+            ratio=cfg.cleaning.max_non_ascii_ratio,
+            absolute=cfg.cleaning.max_non_ascii_abs,
+        )
+        rec["essay"] = strip_non_ascii(
+            rec["essay"],
+            ratio=cfg.cleaning.max_non_ascii_ratio,
+            absolute=cfg.cleaning.max_non_ascii_abs,
+        )
+        if not rec["prompt"] or not rec["essay"]:
+            print("Skipped: too many non-ASCII symbols\n")
+            continue
+
+        payload_text = f'PROMPT: {rec["prompt"]}  ESSAY: {rec["essay"]}'
+        pred = query_triton(infer_url, [payload_text])[0]
+        pretty_print(rec, pred)
 
 
 if __name__ == "__main__":
-    dataset = load_dataset(DATA_PATH)
-    for rec in sample_essays(dataset, 3):
-        rec["prompt"] = strip_non_ascii(rec["prompt"], ratio=0.05, absolute=50)
-        rec["essay"] = strip_non_ascii(rec["essay"], ratio=0.05, absolute=50)
-        if not rec["prompt"] or not rec["essay"]:
-            print("essay or prompt contain too much non-ascii symbols, skiping it")
-            continue
-
-        predicted = query_triton([f'PROMPT: {rec["prompt"]}  ESSAY: {rec["essay"]}'])[0]
-        pretty_print(rec, predicted)
+    main()

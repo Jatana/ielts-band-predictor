@@ -11,6 +11,7 @@ from typing import List
 import hydra
 import torch
 from omegaconf import DictConfig, OmegaConf
+from remove_nonascii import strip_non_ascii
 from transformers import AutoTokenizer
 
 from ielts_band_predictor.models import BertBandRegressor
@@ -46,6 +47,20 @@ def main(cfg: DictConfig):
     abs_errs, sq_errs = [], []
 
     for i, rec in enumerate(batch, 1):
+        rec["prompt"] = strip_non_ascii(
+            rec["prompt"],
+            ratio=cfg.cleaning.max_non_ascii_ratio,
+            absolute=cfg.cleaning.max_non_ascii_abs,
+        )
+        rec["essay"] = strip_non_ascii(
+            rec["essay"],
+            ratio=cfg.cleaning.max_non_ascii_ratio,
+            absolute=cfg.cleaning.max_non_ascii_abs,
+        )
+        if not rec["prompt"] or not rec["essay"]:
+            print("Skipped: too many non-ASCII symbols\n")
+            continue
+
         text = f'PROMPT: {rec["prompt"]}  ESSAY: {rec["essay"]}'
         enc = tokenizer(
             text, truncation=True, padding="max_length", max_length=cfg.max_len, return_tensors="pt"
