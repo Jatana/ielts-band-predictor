@@ -1,0 +1,13 @@
+# configs/datamodule/default.yaml
+_target_: ielts_band_predictor.data.IELTSDataModule
+
+raw_path: data/raw/essays.jsonl # путь в репозитории DVC (или s3://…)
+batch_size: 16
+max_length: 512
+val_size: 0.1
+num_workers: 4
+seed: ${seed}
+
+# !!! чтобы DataModule знал, какой токенизатор использовать,
+# прокидываем имя из model-конфига:
+tokenizer_name: ${model.pretrained_name}

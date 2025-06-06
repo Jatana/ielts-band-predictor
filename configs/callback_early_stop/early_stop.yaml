@@ -1,0 +1,6 @@
+# Standard AdamW; pulls lr / weight_decay from the active model config
+
+_target_: torch.optim.AdamW
+
+lr: ${model.lr} # inherits value from model config
+weight_decay: ${model.weight_decay}

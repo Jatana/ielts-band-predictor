@@ -1,0 +1,4 @@
+# базовый конфиг для скрипта export_onnx.py
+ckpt: artifacts/checkpoints/best.ckpt
+onnx: artifacts/model.onnx
+max_len: 512

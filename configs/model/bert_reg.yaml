@@ -1,0 +1,8 @@
+# Fine-tuning BERT → regression head that predicts an IELTS band
+
+_target_: ielts_band_predictor.models.BertBandRegressor
+
+pretrained_name: bert-base-uncased # any HF ckpt, e.g. 'bert-large-cased'
+lr: 2e-5 # will be reused by the optimizer
+weight_decay: 1e-2
+freeze_n_layers: 10 # freeze bottom N encoder layers

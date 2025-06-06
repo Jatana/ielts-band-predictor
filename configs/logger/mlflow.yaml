@@ -1,0 +1,8 @@
+# отдельный вариант ‟logger: mlflow”
+_target_: lightning.pytorch.loggers.MLFlowLogger
+
+# все 3 поля читаются напрямую MLFlowLogger-ом
+experiment_name: ielts-band-predictor
+tracking_uri: http://127.0.0.1:5001 # ← ваш удалённый / локальный сервер
+tags:
+  run_type: train # любые собственные теги
