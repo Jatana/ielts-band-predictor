@@ -9,17 +9,17 @@ Given a **PROMPT** and the candidate’s **ESSAY**, the model returns a floating
 
 ```bash
 # clone and enter the repo
-git clone https://github.com/you/ielts-band-predictor.git
+git clone https://github.com/jatana/ielts-band-predictor.git
 cd ielts-band-predictor
 
 # install runtime + dev dependencies into a Poetry venv
-poetry install --with dev
+poetry install
 
 # activate Git hooks (black, isort, flake8, prettier, etc.)
 poetry run pre-commit install
 ```
 
-> Run `poetry run pre-commit run -a` at any time – all hooks should be green ✅.
+> Run `poetry run pre-commit run -a` at any time – all hooks should be green.
 
 ---
 
@@ -29,22 +29,27 @@ poetry run pre-commit install
 poetry run python -m ielts_band_predictor.scripts.train
 ```
 
-- Hyper-parameters are managed by **Hydra** – override anything from the CLI:
-  `model.lr=1e-5 datamodule.batch_size=32`.
+- Hyper-parameters are managed by **Hydra**. Training parameters are located configs/train.yaml.
 
-- The best checkpoint is saved to `artifacts/checkpoints/best.ckpt` and symlinked
-  as `best-epoch=…-val_mae=….ckpt`.
+- Displays graphs at MLFlow. Expects that the MLFlow server is already up. The address can be configured in configs/logger/mlflow.yaml (by default 127.0.0.1:8080).
+
+- The best checkpoint is saved to `artifacts/checkpoints/best.ckpt`. All checkpoints can be found in `artifacts/checkpoints/`.
 
 ---
+
+MLFlow server can be started by
+
+```bash
+poetry run mlflow server --host 127.0.0.1 --port 8080 --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns
+```
 
 ## 3 · Sanity-check on random essays
 
 ```bash
-poetry run python -m ielts_band_predictor.scripts.eval_random \
-  k=10                                           # sample 10 essays
+poetry run python -m ielts_band_predictor.scripts.eval_random
 ```
 
-Outputs band, prediction, absolute error and reports MAE / RMSE.
+Check trained model on random essays. Hyperparameters can be configured in configs/eval_random.yaml. Outputs band, prediction, absolute error and reports MAE / RMSE.
 
 ---
 
@@ -63,6 +68,8 @@ docker run --gpus all --rm -it -v $(pwd):/workspace \
 bash ielts_band_predictor/scripts/export_trt.sh
 ```
 
+Hyperparameters of exporting to ONNX can be configured in configs/export_onnx.yaml. Hyperparameters of exporting to TensorRT can be configured in the bash file.
+
 ---
 
 ## 5 · Serve with Triton Inference Server
@@ -70,6 +77,7 @@ bash ielts_band_predictor/scripts/export_trt.sh
 ### Docker image (all-in-one)
 
 ```bash
+cd triton_inference_server
 docker build -t ielts-triton:1.0 .
 docker run --gpus '"device=0"' --rm \
   -p8010:8000  -p8011:8001  -p8012:8002 \
@@ -90,9 +98,7 @@ docker compose up --build -d
 ## 6 · Score an essay via REST
 
 ```bash
-poetry run python -m ielts_band_predictor.scripts.client_test \
-  server.url=http://localhost:8010 \
-  k=3                      # evaluate 3 random essays
+poetry run python -m ielts_band_predictor.scripts.client_test
 ```
 
 The script
@@ -101,6 +107,8 @@ The script
 2. strips non-ASCII garbage,
 3. sends them to Triton (`ielts_pipeline` ensemble),
 4. prints predicted bands.
+
+Hyperparameters can be configured in configs/infer.yaml.
 
 ---
 
@@ -123,23 +131,3 @@ The script
 ```
 
 ---
-
-## 7 · Useful one-liners
-
-```bash
-# check code style only
-poetry run pre-commit run --all-files --show-diff-on-failure
-
-# run unit tests
-poetry run pytest -q
-
-# reproduce latest DVC stage (dataset, onnx, trt…)
-dvc repro
-
-# open MLflow UI (if enabled in train.yaml)
-mlflow ui --port 5000
-```
-
----
-
-Happy scoring ✨
