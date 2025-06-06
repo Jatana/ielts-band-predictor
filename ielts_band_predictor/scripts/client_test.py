@@ -3,10 +3,13 @@ from __future__ import annotations
 import json
 import random
 import textwrap
+from io import StringIO
 from pathlib import Path
 from typing import List
 
+import dvc.api
 import hydra
+import pandas as pd
 import requests
 from omegaconf import DictConfig, OmegaConf
 
@@ -58,7 +61,11 @@ def main(cfg: DictConfig) -> None:
 
     infer_url = f"{cfg.server.url}/v2/models/{cfg.server.model}/infer"
 
-    dataset = load_dataset(Path(cfg.data_path))
+    content = dvc.api.read(cfg.data_path, mode="r")
+    df = pd.read_json(StringIO(content), lines=True)
+    dataset = df.to_dict(orient="records")
+
+    # dataset = load_dataset(Path(cfg.data_path))
     for rec in random.sample(dataset, cfg.k):
         # ASCII cleaning
         rec["prompt"] = strip_non_ascii(

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pathlib import Path
+from io import StringIO
 
 import dvc.api
 import pandas as pd
@@ -40,23 +40,12 @@ class IELTSDataModule(LightningDataModule):
         self.tokenizer: AutoTokenizer | None = None
         self.dataset: DatasetDict | None = None
 
-    def prepare_data(self):
-        if self.raw_path.startswith("s3://") or ".dvc" in self.raw_path:
-            with dvc.api.open(self.raw_path, mode="r") as f:
-                _ = f.readline()
-        else:
-            pass
-
     def setup(self, stage):
         if self.dataset is not None:
             return
 
-        url = self.raw_path
-        if ".dvc" in self.raw_path:
-            url = dvc.api.get_url(self.raw_path)
-
-        path: str | Path = url
-        df = pd.read_json(path, lines=True)
+        content = dvc.api.read(self.raw_path, mode="r")
+        df = pd.read_json(StringIO(content), lines=True)
 
         clean_texts, labels = [], []
         for essay, prompt, band in zip(df["essay"], df["prompt"], df["band"]):

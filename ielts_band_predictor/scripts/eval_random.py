@@ -5,10 +5,13 @@ import math
 import random
 import statistics
 import textwrap
+from io import StringIO
 from pathlib import Path
 from typing import List
 
+import dvc.api
 import hydra
+import pandas as pd
 import torch
 from omegaconf import DictConfig, OmegaConf
 from transformers import AutoTokenizer
@@ -41,7 +44,9 @@ def main(cfg: DictConfig):
     print("Loaded model:", model.hparams.pretrained_name)
 
     # sample essays
-    dataset = _load_jsonl(cfg.data)
+    content = dvc.api.read(cfg.data, mode="r")
+    df = pd.read_json(StringIO(content), lines=True)
+    dataset = df.to_dict(orient="records")
     batch = _sample(dataset, cfg.k)
 
     abs_errs, sq_errs = [], []
