@@ -1,15 +1,10 @@
-# ielts_band_predictor/data.py
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Literal
 
 import dvc.api
-import numpy as np
 import pandas as pd
-import torch
-from datasets import Dataset, DatasetDict, load_dataset
+from datasets import Dataset, DatasetDict
 from lightning import LightningDataModule
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
@@ -19,13 +14,6 @@ from ielts_band_predictor.scripts.remove_nonascii import strip_non_ascii
 
 
 class IELTSDataModule(LightningDataModule):
-    """
-    Lightning-обёртка над HF-Dataset, настраиваемая через Hydra-config.
-
-    Параметры поступают из configs/datamodule/*.yaml, т. е. вам ничего не
-    нужно менять в коде — только в конфиге.
-    """
-
     def __init__(
         self,
         raw_path: str,
@@ -37,7 +25,7 @@ class IELTSDataModule(LightningDataModule):
         max_non_ascii_ratio: float = 0.05,
         max_non_ascii_abs: int = 50,
         tokenizer_name: str = "bert-base-uncased",
-    ) -> None:
+    ):
         super().__init__()
         self.raw_path = raw_path
         self.batch_size = batch_size
@@ -52,31 +40,22 @@ class IELTSDataModule(LightningDataModule):
         self.tokenizer: AutoTokenizer | None = None
         self.dataset: DatasetDict | None = None
 
-    # -------- обязательные «хуки» Lightning --------
-    def prepare_data(self) -> None:
-        """
-        Скачивание датасета (если лежит в DVC-remote) выполняем
-        только на 1 процессе: Lightning гарантирует, что метод
-        вызовется лишь на rank=0.
-        """
+    def prepare_data(self):
         if self.raw_path.startswith("s3://") or ".dvc" in self.raw_path:
-            # пример через dvc.api.open — подтянет файл, если его нет
             with dvc.api.open(self.raw_path, mode="r") as f:
-                _ = f.readline()  # только триггер для загрузки
+                _ = f.readline()
         else:
-            # локальный файл — ничего делать не надо
             pass
 
-    def setup(self, stage: Literal["fit", "validate", "test", "predict"] | None = None) -> None:
-        """
-        Загрузка и предобработка данных. Запускается и на train, и на
-        inference, но только один раз в каждом процессе.
-        """
-        if self.dataset is not None:  # уже инициализировано
+    def setup(self, stage):
+        if self.dataset is not None:
             return
 
-        # ---------- 1. читаем jsonl ----------
-        path: str | Path = dvc.api.get_url(self.raw_path) if ".dvc" in self.raw_path else self.raw_path
+        url = self.raw_path
+        if ".dvc" in self.raw_path:
+            url = dvc.api.get_url(self.raw_path)
+
+        path: str | Path = url
         df = pd.read_json(path, lines=True)
 
         clean_texts, labels = [], []
@@ -88,21 +67,18 @@ class IELTSDataModule(LightningDataModule):
                 absolute=self.max_non_ascii_abs,
             )
             if clean is None:
-                continue            # discard this row entirely
+                continue  # discard this row entirely
             clean_texts.append(clean)
             labels.append(float(band))
 
         df = pd.DataFrame({"text": clean_texts, "labels": labels})
-
 
         # df["text"] = df.apply(
         #     lambda row: f'PROMPT: {row["prompt"]}  ESSAY: {row["essay"]}',
         #     axis=1,
         # )
 
-        # df = df[["text", "band"]].rename(columns={"band": "labels"})  # HF-Datasets expects 'labels'
-
-        # ---------- 2. stratified split ----------
+        # stratified split
         train_df, val_df = train_test_split(
             df,
             test_size=self.val_size,
@@ -113,7 +89,7 @@ class IELTSDataModule(LightningDataModule):
         val_ds = Dataset.from_pandas(val_df.reset_index(drop=True))
         self.dataset = DatasetDict(train=train_ds, validation=val_ds)
 
-        # ---------- 3. токенизатор ----------
+        # tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_name)
 
         def _tokenize(batch):
@@ -128,10 +104,9 @@ class IELTSDataModule(LightningDataModule):
 
         self.dataset = self.dataset.map(_tokenize, batched=True, remove_columns=["text"])
 
-        # задаём формат, чтобы __getitem__ выдавал torch.Tensor
         self.dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
 
-    # -------- dataloaders --------
+    # dataloaders
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
             self.dataset["train"],
@@ -149,5 +124,3 @@ class IELTSDataModule(LightningDataModule):
             num_workers=self.num_workers,
             pin_memory=True,
         )
-
-    # (Если потребуется тест-датасет, добавьте аналогичный метод.)
