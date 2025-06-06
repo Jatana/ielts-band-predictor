@@ -76,6 +76,14 @@ Hyperparameters of exporting to TensorRT can be configured in the bash file.
 
 ## 5 · Serve with Triton Inference Server
 
+The following command copies TensorRT model to the inference server and prepares the server for running.
+
+```bash
+poetry run python -m ielts_band_predictor.scripts.prepare_triton +src_plan=artifacts/model.plan
+```
+
+After that command the server is ready to be started.
+
 ### Docker image (all-in-one)
 
 ```bash
@@ -86,12 +94,13 @@ docker run --gpus '"device=0"' --rm \
   ielts-triton:1.0
 ```
 
-- **8000** – HTTP/REST  **8001** – gRPC  **8002** – Prometheus metrics
+- **8010** – HTTP/REST  **8011** – gRPC  **8012** – Prometheus metrics
 - Health-check: `curl localhost:8010/v2/health/ready → OK`
 
 ### docker-compose alternative
 
 ```bash
+cd triton_inference_server
 docker compose up --build -d
 ```
 
