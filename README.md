@@ -7,7 +7,8 @@ Given a **PROMPT** and the candidate’s **ESSAY**, the model returns a floating
 
 ## 0 · Description
 
-The dataset, scraped from _writing9.com_, contains 11 000 IELTS Task-2 essays—exactly 1 000 for every half-band from 4.0 to 9.0. Band prediction is performed with a `bert-base-uncased` backbone followed by a single linear layer; the lower ten Transformer blocks remain frozen during fine-tuning. A stratified 90 / 10 split is used for training and validation. After five epochs (≈ 3 min on a single GPU) the model reaches a validation MAE of ≈ 0.8 band, not far from the \~0.5-band consistency of human graders.
+The dataset, scraped from [writing9.com](https://writing9.com), contains 11 000 IELTS Task-2 essays—exactly 1 000 for every half-band from 4.0 to 9.0.
+Band prediction is performed with the Hugging Face checkpoint [**bert-base-uncased**](https://huggingface.co/google-bert/bert-base-uncased) followed by a single linear layer; the lower ten Transformer blocks stay frozen during fine-tuning. A stratified 90 / 10 split is used for training and validation. After five epochs (≈ 3 min on a single GPU) the model reaches a validation MAE of about **0.8 band**, close to the \~0.5-band agreement typically seen between human graders.
 
 ---
 
