@@ -14,6 +14,8 @@ For scoring, the Hugging Face checkpoint [**bert-base-uncased**](https://hugging
 
 ## 1 · Quick start
 
+_Requires python 3.10 or higher._
+
 ```bash
 # clone and enter the repo
 git clone https://github.com/jatana/ielts-band-predictor.git
