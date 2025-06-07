@@ -8,7 +8,7 @@ Given a **PROMPT** and the candidate’s **ESSAY**, the model returns a floating
 ## 0 · Description
 
 The dataset, scraped from [writing9.com](https://writing9.com), contains 11 000 IELTS Task-2 essays—exactly 1 000 for every half-band from 4.0 to 9.0. Before training, each text is passed through a lightweight filter that strips non-ASCII characters; if an essay loses more than a small threshold it is discarded.
-For scoring, we fine-tune the Hugging Face checkpoint [**bert-base-uncased**](https://huggingface.co/google-bert/bert-base-uncased) with a single linear head. The prompt and essay are concatenated as one input string—`PROMPT: <prompt> ESSAY: <essay>`. Ten of the twelve Transformer layers remain frozen, and the data are split 90 %/10 % (stratified) for training and validation. After five epochs (≈ 3 min on a single GPU) the model attains a validation MAE of ≈ 0.8 band, approaching the \~0.5-band consistency typical of human graders.
+For scoring, the Hugging Face checkpoint [**bert-base-uncased**](https://huggingface.co/google-bert/bert-base-uncased) is fine-tuned with a single linear head. The prompt and essay are concatenated as one input string—`PROMPT: <prompt> ESSAY: <essay>`. Ten of the twelve Transformer layers remain frozen, and the data are split 90 %/10 % (stratified) for training and validation. After five epochs (≈ 3 min on a single GPU) the model attains a validation MAE of ≈ 0.8 band, approaching the \~0.5-band consistency typical of human graders.
 
 ---
 
