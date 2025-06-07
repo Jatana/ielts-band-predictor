@@ -7,8 +7,8 @@ Given a **PROMPT** and the candidate’s **ESSAY**, the model returns a floating
 
 ## 0 · Description
 
-The dataset, scraped from [writing9.com](https://writing9.com), contains 11 000 IELTS Task-2 essays—exactly 1 000 for every half-band from 4.0 to 9.0.
-Band prediction is performed with the Hugging Face checkpoint [**bert-base-uncased**](https://huggingface.co/google-bert/bert-base-uncased) followed by a single linear layer; the lower ten Transformer blocks stay frozen during fine-tuning. A stratified 90 / 10 split is used for training and validation. After five epochs (≈ 3 min on a single GPU) the model reaches a validation MAE of about **0.8 band**, close to the \~0.5-band agreement typically seen between human graders.
+The dataset, scraped from [writing9.com](https://writing9.com), contains 11 000 IELTS Task-2 essays—exactly 1 000 for every half-band from 4.0 to 9.0. Before training, each text is passed through a lightweight filter that strips non-ASCII characters; if an essay loses more than a small threshold it is discarded.
+For scoring, we fine-tune the Hugging Face checkpoint [**bert-base-uncased**](https://huggingface.co/google-bert/bert-base-uncased) with a single linear head. The prompt and essay are concatenated as one input string—`PROMPT: <prompt> ESSAY: <essay>`. Ten of the twelve Transformer layers remain frozen, and the data are split 90 %/10 % (stratified) for training and validation. After five epochs (≈ 3 min on a single GPU) the model attains a validation MAE of ≈ 0.8 band, approaching the \~0.5-band consistency typical of human graders.
 
 ---
 
@@ -36,7 +36,7 @@ poetry run pre-commit install
 poetry run python -m ielts_band_predictor.scripts.train
 ```
 
-- Hyper-parameters are managed by **Hydra**. Training parameters are located `configs/train.yaml`.
+- Hyper-parameters are managed by **Hydra**. Training parameters are located in `configs/train.yaml`.
 
 - Displays graphs at MLFlow. Expects that the MLFlow server is already up. The address can be configured in `configs/logger/mlflow.yaml` (by default 127.0.0.1:8080).
 
@@ -69,6 +69,8 @@ poetry run python -m ielts_band_predictor.scripts.export_onnx
 ```
 
 By default it will convert `artifacts/checkpoints/best.ckpt` to `artifacts/model.onnx`. To specify custom files modify `configs/export_onnx.yaml`.
+
+To convert to TensorRT format run:
 
 ```bash
 # fire up the TensorRT image
